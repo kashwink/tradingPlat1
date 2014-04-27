@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- <beans xmlns="http://www.springframework.org/schema/beans" -->
+<!-- xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" -->
+<!-- xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd 
+	http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-3.1.xsd 
+	http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.1.xsd 
+	http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-3.1.xsd"> -->
+
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:tx="http://www.springframework.org/schema/tx"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:aop="http://www.springframework.org/schema/aop"
+	xmlns:ehcache="http://ehcache-spring-annotations.googlecode.com/svn/schema/ehcache-spring"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans
+ 
+http://www.springframework.org/schema/beans/spring-beans-3.1.xsd
+ 
+ 
+http://www.springframework.org/schema/tx
+ 
+ 
+http://www.springframework.org/schema/tx/spring-tx-3.1.xsd
+ 
+ 
+http://www.springframework.org/schema/context
+ 
+ 
+http://www.springframework.org/schema/context/spring-context-3.1.xsd
+ 
+                        http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-3.1.xsd
+                        
+                        http://ehcache-spring-annotations.googlecode.com/svn/schema/ehcache-spring http://ehcache-spring-annotations.googlecode.com/svn/schema/ehcache-spring/ehcache-spring-1.1.xsd
+                        ">
+
+	<!-- Root Context: defines shared resources visible to all other web components -->
+
+
+	<context:component-scan base-package="app" />
+	<context:annotation-config />
+
+	<tx:annotation-driven transaction-manager="transactionManager" />
+	<aop:config proxy-target-class="true" />
+
+	<bean id="tradeUserDataProvider" class="com.app.DataProvider.TradeDataProviderImpl" />
+	<!-- <bean id="tradeUserService" class="com.app.tradingplatform.service.TraderUserServiceImpl"/> -->
+
+	<bean id="dataSource" class="org.apache.commons.dbcp.BasicDataSource"
+		destroy-method="close">
+		<property name="driverClassName" value="org.hsqldb.jdbc.JDBCDriver" />
+		<property name="url" value="jdbc:hsqldb:hsql://localhost/testdb" />
+		<property name="username" value="SA" />
+		<property name="password" value="" />
+	</bean>
+
+	<bean id="sessionFactory"
+		class="org.springframework.orm.hibernate3.annotation.AnnotationSessionFactoryBean">
+		<property name="dataSource" ref="dataSource" />
+		<property name="configLocation" value="classpath:hibernate.cfg.xml" />
+		<property name="annotatedClasses">
+	        <list>
+	            <value>com.app.tradingplatform.domain.User</value>
+	        </list>
+    	</property>
+		<property name="packagesToScan" value="com.app.tradingplatform.domain" />
+		<property name="hibernateProperties">
+			<props>
+				<prop key="hibernate.connection.pool_size">10</prop>
+				<prop key="hibernate.connection.show_sql">true</prop>
+				<prop key="hibernate.dialect">org.hibernate.dialect.HSQLDialect</prop>
+				<prop key="hibernate.show_sql">true</prop>
+			</props>
+		</property>
+	</bean>
+
+	<bean id="transactionManager"
+		class="org.springframework.orm.hibernate3.HibernateTransactionManager">
+		<property name="sessionFactory" ref="sessionFactory" />
+	</bean>
+	
+	<bean id="userDao" class="com.app.tradingplatform.dao.UserHome"/>
+	
+	 <ehcache:annotation-driven />
+ 
+    <ehcache:config cache-manager="cacheManager">
+        <ehcache:evict-expired-elements interval="60" />
+    </ehcache:config>
+ 
+ <bean id="cacheManager" class="org.springframework.cache.ehcache.EhCacheManagerFactoryBean">
+    <property name="configLocation"  value="/WEB-INF/ehcache.xml"/>
+</bean>
+   
+ 
+    <!-- rest of the file omitted -->
+</beans>
